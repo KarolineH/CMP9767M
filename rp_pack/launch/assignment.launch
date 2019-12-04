@@ -2,7 +2,7 @@
 
   <!-- Launch components -->
   <include file="$(find uol_cmp9767m_base)/launch/thorvald-sim.launch">
-    <arg name="obstacles" default="true" />
+    <arg name="obstacles" default="false" />
     <arg name="second_robot" default="false" />
     <arg name="fake_localisation" default= "false"/>
     <arg name="map_server" default= "true"/>
