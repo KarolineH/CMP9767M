@@ -25,7 +25,13 @@ sudo apt-get install \
     ros-kinetic-uol-cmp9767m-base \
     ros-kinetic-uol-cmp9767m-tutorial \
     ros-kinetic-find-object-2d \
-    ros-kinetic-video-stream-opencv
+    ros-kinetic-video-stream-opencv \
+    ros-kinetic-robot-localization \
+    ros-kinetic-topological-navigation \
+    ros-kinetic-amcl \
+    ros-kinetic-fake-localization \
+    ros-kinetic-carrot-planner
+
 
 cd ~/catkin_ws/src
 git clone https://github.com/KarolineH/CMP9767M
