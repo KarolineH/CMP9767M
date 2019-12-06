@@ -47,8 +47,8 @@ class Plant_discriminator():
     def runtime_routine(self):
         latest_image = rospy.wait_for_message("/{}/kinect2_camera/hd/image_color_rect".format(self.robot_id), Image, timeout = 30)
         (x,y) = self.predict(latest_image)
-        image_message = self.bridge.cv2_to_imgmsg(y, encoding="mono8")
-        self.filter_pub.publish(image_message)
+        filter_message = self.bridge.cv2_to_imgmsg(y, encoding="mono8")
+        self.filter_pub.publish(filter_message)
         weed_pixels = PixelArray()
         weed_pixels.array = self.component_detection(x,y)
         self.pixel_pub.publish(weed_pixels)
