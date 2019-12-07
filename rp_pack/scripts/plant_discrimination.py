@@ -4,6 +4,7 @@ import rospkg
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 from sensor_msgs.msg import Image, CameraInfo
 from rp_pack.msg import PixelArray, Pixel
 from cv_bridge import CvBridge
@@ -11,6 +12,15 @@ import scipy.misc
 from sklearn.linear_model import LogisticRegression
 
 class Plant_discriminator():
+
+    """
+    Subscribes to the camera stream
+    Classifies each RGB pixel as weed or no weed (using logistic regression fitted to training images)
+    Detects connected components (clusters of weed pixels) of a certain size
+    Finds the centroids of the detected clusters
+    Publishes those centroid pixel positions to /weed_pixels
+    """
+
     def __init__(self, robot_name):
         """Set-up routine"""
         rospy.init_node('plant_discriminator', anonymous=True)
@@ -103,6 +113,12 @@ class Plant_discriminator():
         self.image_pub.publish(image_message)
         return weed_pixels
 
+
+    """
+    The following methods are useful for debugging
+    and extracting visualisations of the detection process
+    """
+
     def view_prediction(self,x,y):
         """Show an input image and a prediction side by side"""
         cv2.imshow('input',x)
@@ -130,4 +146,4 @@ class Plant_discriminator():
         cv2.waitKey(0)
 
 if __name__ == "__main__":
-    pd = Plant_discriminator('thorvald_001')
+    pd = Plant_discriminator(sys.argv[1])
