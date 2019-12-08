@@ -9,20 +9,23 @@ from geometry_msgs.msg import PoseStamped, PoseArray
 
 class Camera_converter():
     def __init__(self, robot_name):
-        self.robot_id = robot_name
         rospy.init_node('camera_converter', anonymous = True)
-        self.tfl = tf.TransformListener()
-        self.pub = rospy.Publisher("/{}/weed_poses".format(self.robot_id), PoseArray, queue_size=5)
+        self.robot_id = robot_name
 
-        camera_info = rospy.wait_for_message("/{}/kinect2_camera/hd/camera_info".format(self.robot_id), CameraInfo)
-        self.rate = rospy.Rate(10.0)
-        self.rate.sleep()
-        initial_cam_pose = self.tfl.lookupTransform("/map","/{}/kinect2_rgb_optical_frame".format(self.robot_id), rospy.Time())
+        # safely fetch camera transform (see "time travel with tf")
+        self.tfl = tf.TransformListener()
+        now = rospy.Time(0)
+        self.tfl.waitForTransform("/map","/{}/kinect2_rgb_optical_frame".format(self.robot_id),now, rospy.Duration(5.0))
+        initial_cam_pose = self.tfl.lookupTransform("/map","/{}/kinect2_rgb_optical_frame".format(self.robot_id), now)
         self.camera_height = initial_cam_pose[0][2] # Assuming that the camera is parallel to the ground
+
+        # and camera info
+        camera_info = rospy.wait_for_message("/{}/kinect2_camera/hd/camera_info".format(self.robot_id), CameraInfo)
         self.inv_camera_matrix = np.linalg.inv(np.reshape(camera_info.K, [3,3]))
         self.define_fieldOfView_footprint(camera_info)
 
         self.sub = rospy.Subscriber("/{}/weed_pixels".format(self.robot_id), PixelArray, self.weed_callback)
+        self.pub = rospy.Publisher("/{}/weed_poses".format(self.robot_id), PoseArray, queue_size=5)
         rospy.spin()
 
     def define_fieldOfView_footprint(self, cam_info):
