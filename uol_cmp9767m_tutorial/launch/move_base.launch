@@ -13,23 +13,25 @@
             <remap from="base_pose_ground_truth" to="$(arg robot_name)/odometry/gazebo" />
             <param name="odom_frame_id" type="string" value="$(arg robot_name)/odom"/>
             <param name="base_frame_id" type="string" value="$(arg robot_name)/base_link"/>
-	</node> 
-	 -->	
+	</node>
+	 -->
 	<!-- <include file="$(find uol_cmp9767m_tutorial)/launch/amcl.launch"/> -->
-	
-	
+
+
 	<!-- move_base -->
-	<node name="move_base" pkg="move_base" type="move_base" output="screen">
-        <remap from="odom" to="$(arg robot_name)/odometry/base_raw" />
-        <remap from="cmd_vel" to="$(arg robot_name)/nav_vel" />
+	<group ns="$(arg robot_name)">
+		<node name="move_base" pkg="move_base" type="move_base" output="screen">
+	        <remap from="odom" to="odometry/base_raw" />
+	        <remap from="cmd_vel" to="nav_vel" />
 
-        <rosparam file="$(find uol_cmp9767m_tutorial)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-        <rosparam file="$(find uol_cmp9767m_tutorial)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+	        <rosparam file="$(find uol_cmp9767m_tutorial)/config/$(arg robot_name)_costmap_common_params.yaml" command="load" ns="global_costmap"/>
+	        <rosparam file="$(find uol_cmp9767m_tutorial)/config/$(arg robot_name)_costmap_common_params.yaml" command="load" ns="local_costmap"/>
 
-        <rosparam file="$(find uol_cmp9767m_tutorial)/config/global_costmap_params.yaml" command="load"/>
-        <rosparam file="$(find uol_cmp9767m_tutorial)/config/local_costmap_params.yaml" command="load"/>
+	        <rosparam file="$(find uol_cmp9767m_tutorial)/config/global_costmap_params.yaml" command="load"/>
+	        <rosparam file="$(find uol_cmp9767m_tutorial)/config/local_costmap_params.yaml" command="load"/>
 
-        <rosparam file="$(find uol_cmp9767m_tutorial)/config/planners.yaml" command="load"/>
+	        <rosparam file="$(find uol_cmp9767m_tutorial)/config/planners.yaml" command="load"/>
 
-	</node> 
+		</node>
+	</group>
 </launch>

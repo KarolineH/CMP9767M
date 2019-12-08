@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 
 <launch>
-
-    <arg name="robot_name" default="thorvald_001"/>
-
+  <arg name="robot_name" default="thorvald_001"/>
+  <group ns="$(arg robot_name)">
     <node pkg="amcl" type="amcl" name="amcl" output="screen">
 
-       <!-- see param description on http://www.ros.org/wiki/amcl -->     
-       <remap from="scan" to="$(arg robot_name)/scan" />
+       <!-- see param description on http://www.ros.org/wiki/amcl -->
+       <!-- <remap from="scan" to="/$(arg robot_name)/scan" /> -->
+       <remap from="map" to="/map" />
+       <remap from="tf" to="/tf" />
 
        <!--overall filter -->
        <param name="min_particles" value="100"/>
@@ -23,7 +24,7 @@
        <param name="gui_publish_rate" value="10.0"/>
 
        <!-- laser model -->
-       <param name="laser_max_beams" value="30"/> 
+       <param name="laser_max_beams" value="30"/>
        <param name="laser_z_hit" value="0.95"/>
        <param name="laser_z_short" value="0.1"/>
        <param name="laser_z_max" value="0.05"/>
@@ -32,7 +33,6 @@
        <param name="laser_lambda_short" value="0.1"/>
        <param name="laser_likelihood_max_dist" value="2.0"/>
        <param name="laser_model_type" value="likelihood_field"/>
-
 
        <!-- odometry model -->
        <param name="odom_model_type" value="diff"/>
@@ -46,6 +46,6 @@
 
        <!-- map -->
        <param name="use_map_topic" value="true"/>
-
-   </node>
+     </node>
+   </group>
 </launch>

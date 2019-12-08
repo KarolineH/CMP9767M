@@ -1,0 +1,10 @@
+<launch>
+  <group ns="thorvald_001">
+    <node pkg="rp_pack" type="plant_discrimination.py" name="plant_discriminator" args="thorvald_001"/>
+    <node pkg="rp_pack" type="camera_geometry.py" name="camera_converter" args="thorvald_001"/> -->
+  </group>
+  <group ns="thorvald_002">
+    <node pkg="rp_pack" type="plant_discrimination.py" name="plant_discriminator" args="thorvald_001"/>
+    <node pkg="rp_pack" type="camera_geometry.py" name="camera_converter" args="thorvald_002"/> -->
+  </group>
+</launch>
