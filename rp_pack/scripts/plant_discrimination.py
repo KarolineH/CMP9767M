@@ -42,8 +42,10 @@ class Plant_discriminator():
         self.labeled_image_r1 = rospack.get_path('rp_pack')+'/Supporting_Files/row1_filtered.png'
         self.raw_image_r2 = rospack.get_path('rp_pack')+'/Supporting_Files/row2_training_image.png'
         self.labeled_image_r2 = rospack.get_path('rp_pack')+'/Supporting_Files/row2_filtered.png'
+        self.raw_image_soil = rospack.get_path('rp_pack')+'/Supporting_Files/soil_training_image.png'
+        self.labeled_image_soil = rospack.get_path('rp_pack')+'/Supporting_Files/soil_filtered.png'
         # Fetch camera info
-        camera_info = rospy.wait_for_message("/{}/kinect2_camera/hd/camera_info".format(self.robot_id), CameraInfo)
+        camera_info = rospy.wait_for_message("/{}/kinect2_camera/hd/camera_info".format(self.robot_id), CameraInfo, timeout=None)
         self.image_size = (camera_info.height, camera_info.width)
         self.image_channels = 3 #3 channels, for RGB image
 
@@ -55,7 +57,7 @@ class Plant_discriminator():
             self.runtime_routine()
 
     def runtime_routine(self):
-        latest_image = rospy.wait_for_message("/{}/kinect2_camera/hd/image_color_rect".format(self.robot_id), Image, timeout = 30)
+        latest_image = rospy.wait_for_message("/{}/kinect2_camera/hd/image_color_rect".format(self.robot_id), Image, timeout = 5)
         (x,y) = self.predict(latest_image)
         filter_message = self.bridge.cv2_to_imgmsg(y, encoding="mono8")
         self.filter_pub.publish(filter_message)
@@ -69,14 +71,16 @@ class Plant_discriminator():
         # Import and reshape the manually labeled training image
         raw_image_row2 = scipy.misc.imread(self.raw_image_r2)
         labels_row2 = scipy.misc.imread(self.labeled_image_r2)
+        raw_image_soil = scipy.misc.imread(self.raw_image_soil)
+        labels_soil = scipy.misc.imread(self.raw_image_soil)
+        full_image = np.append(raw_image_soil,raw_image_row2,axis = 0)
+        full_labels = np.append(labels_soil,labels_row2,axis = 0)
         if self.include_harder_plants:
             raw_image_row1 = scipy.misc.imread(self.raw_image_r1)
-            full_image = np.append(raw_image_row1,raw_image_row2,axis = 0)
             labels_row1 = scipy.misc.imread(self.labeled_image_r1)
-            full_labels = np.append(labels_row1,labels_row2,axis = 0)
-        else:
-            full_image = raw_image_row2
-            full_labels = labels_row2
+            full_image = np.append(raw_image_row1,full_image,axis = 0)
+            full_labels = np.append(labels_row1,full_labels,axis = 0)
+
         masked_gray_image = cv2.cvtColor(full_labels, cv2.COLOR_BGR2GRAY)
         (thresh, bw_image) = cv2.threshold(masked_gray_image, 127, 255, cv2.THRESH_BINARY) # threshold in the middle, to get binary labels
         # Reshape into one long list of training examples (single pixels)
