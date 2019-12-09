@@ -16,7 +16,7 @@ class Camera_converter():
     and publishes them to /local_weed_poses
     """
 
-    def __init__(self, robot_name, role):
+    def __init__(self, robot_name):
         rospy.init_node('camera_converter', anonymous = True)
         self.robot_id = robot_name
 
@@ -77,4 +77,4 @@ class Camera_converter():
 		return dist
 
 if __name__ == "__main__":
-    cc = Camera_converter(sys.argv[1],sys.argv[2])
+    cc = Camera_converter(sys.argv[1])

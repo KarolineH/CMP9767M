@@ -63,4 +63,27 @@ def grid_indices_to_coordinates(self, indices):
 	coordinate_x = (column_index * self.map_resolution) + self.map_resolution/2 + self.map_origin.x
 	coordinate_y = (indices - column_index)/self.map_width * self.map_resolution + self.map_resolution/2 + self.map_origin.y
 	coord_list = zip(coordinate_x, coordinate_y)
-	import pdb; pdb.set_trace()
+
+
+
+# Tracking weeds as a pointcloud
+# Discarded because it scaled like crazy
+
+		# Initialise the to-do list of points that need to be sprayed
+		self.weed_cloud = PointCloud()
+		self.weed_cloud.header.frame_id = "/map"
+
+		# Set up connections
+		self.sub = rospy.Subscriber("/{}/local_weed_poses".format(self.robot_id), PointCloud, self.add_points)
+		self.pub = rospy.Publisher('/WeedCloud', PointCloud, queue_size = 2)
+		pop_service = rospy.Service('remove_weed', PointCloudOperation, self.remove_points)
+	def add_points(self, newPoints):
+		for point in newPoints.points:
+			self.weed_cloud.points.append(point)
+		self.pub.publish(self.weed_cloud)
+
+	def remove_points(self, checkedPoints):
+		for point in checkedPoints.points:
+			while self.weed_cloud.points.count(point) > 0: # While this point is still somewhere in the list
+				self.weed_cloud.points.remove(point)# remove it
+		self.pub.publish(self.weed_cloud)

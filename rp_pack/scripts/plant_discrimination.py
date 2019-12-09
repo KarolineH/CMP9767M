@@ -21,7 +21,7 @@ class Plant_discriminator():
     Publishes those centroid pixel positions to /weed_pixels
     """
 
-    def __init__(self, robot_name, role):
+    def __init__(self, robot_name):
         """Set-up routine"""
         rospy.init_node('plant_discriminator', anonymous=True)
         self.include_harder_plants = True # trains the regression for discrimination on both the first row, and the slightly harder second row
@@ -146,4 +146,4 @@ class Plant_discriminator():
         cv2.waitKey(0)
 
 if __name__ == "__main__":
-    pd = Plant_discriminator(sys.argv[1],sys.argv[2])
+    pd = Plant_discriminator(sys.argv[1])

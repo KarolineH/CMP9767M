@@ -11,7 +11,7 @@
       <remap from="tf" to="/tf"/>
       <param name="tf_prefix" value="$(arg robot_name)"/>
     </node>
-    <node name="path_planner" pkg="heatmap" type="path_planner.py" respawn="false" output="screen">
+    <node name="path_planner" pkg="heatmap" type="path_planner.py" respawn="false">
       <param name="coverage_spacing" value="$(arg spacing)" />
       <param name="tf_prefix" value="$(arg robot_name)"/>
       <remap from="tf" to="/tf"/>
