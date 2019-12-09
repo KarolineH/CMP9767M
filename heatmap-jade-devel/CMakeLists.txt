@@ -121,7 +121,7 @@ add_dependencies(distance_measure heatmap_generate_messages_cpp ${catkin_EXPORTE
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(signal ${catkin_LIBRARIES})
-target_link_libraries(signal :iwlib.so)
+target_link_libraries(signal :libiw.so)
 target_link_libraries(signal_sim ${catkin_LIBRARIES})
 # target_link_libraries(goal_measure ${catkin_LIBRARIES})
 target_link_libraries(heatmap_client ${catkin_LIBRARIES})
