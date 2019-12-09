@@ -1,18 +1,33 @@
 <launch>
   <arg name="rob_id" default="thorvald_001"/>
+  <arg name="role" default="explorer"/>
+  <arg name="initial_x" default="5.0"/>
 
     <!-- AMCL -->
     <include file="$(find uol_cmp9767m_tutorial)/launch/amcl.launch">
       <arg name="robot_name" value="$(arg rob_id)"/>
+      <arg name="pose_x" value="$(arg initial_x)"/>
     </include>
     <!-- Navigation Stack (move_base)-->
     <include file="$(find uol_cmp9767m_tutorial)/launch/move_base.launch">
       <arg name="robot_name" value="$(arg rob_id)"/>
     </include>
 
-    <!-- Weeding nodes -->
+    <!-- Parallel weeding nodes -->
     <group ns="$(arg rob_id)">
       <node pkg="rp_pack" type="plant_discrimination.py" name="plant_discriminator" args="$(arg rob_id)"/>
       <node pkg="rp_pack" type="camera_geometry.py" name="camera_converter" args="$(arg rob_id)"/>
     </group>
+
+    <!-- Seperate weeding nodes  -->
+    <group if="$(eval role == 'explorer')">
+      <!-- Exploration(coverage path planner) -->
+      <include file="$(find rp_pack)/launch/exploration.launch">
+        <arg name="robot_name" value="$(arg rob_id)"/>
+      </include>
+    </group>
+
+    <group if="$(eval role == 'sprayer')">
+    </group>
+
 </launch>

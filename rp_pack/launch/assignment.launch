@@ -11,9 +11,13 @@
 
   <include file="$(find rp_pack)/launch/single_robot.launch">
     <arg name="rob_id" value="thorvald_001" />
+    <arg name="role" value="explorer" />
+    <arg name="initial_x" value="5.0"/>
   </include>
   <include file="$(find rp_pack)/launch/single_robot.launch" if="$(arg two_robots)">
     <arg name="rob_id" value="thorvald_002" />
+    <arg name="role" value="sprayer" />
+    <arg name="initial_x" value="-5.0"/>
   </include>
 
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find rp_pack)/rviz/rp_config.rviz"/>
