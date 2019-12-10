@@ -1,2 +1,3 @@
+int32 var
 ---
 sensor_msgs/PointCloud output_cloud

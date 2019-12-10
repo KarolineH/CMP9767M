@@ -87,3 +87,17 @@ def grid_indices_to_coordinates(self, indices):
 			while self.weed_cloud.points.count(point) > 0: # While this point is still somewhere in the list
 				self.weed_cloud.points.remove(point)# remove it
 		self.pub.publish(self.weed_cloud)
+
+
+
+#Distance Matrix between all points in a point cloud
+        # Compute distance matrix
+        distance_matrix = np.ones((len(waypoints.points), len(waypoints.points))) * 1000
+        for i in range(len(waypoints.points)):
+            for j in range(len(waypoints.points)):
+                if i < j:
+                    x_diff = abs(waypoints.spoints[i].x - waypoints.points[j].x)
+                    y_diff = abs(waypoints.points[i].y - waypoints.points[j].y)
+
+                    distance_matrix[i,j] = (xdiff**2 + ydiff**2)**0.5 # euclidean distance
+                    distance_matrix[j,i] = distance_matrix[i,j] # since the matrix is symmetrical

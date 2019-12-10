@@ -5,10 +5,10 @@ import sys
 import copy
 from nav_msgs.msg import OccupancyGrid
 from sensor_msgs.msg import PointCloud
-from rp_pack.srv import PointCloudOut, PointCloudTrade
+from rp_pack.srv import PointCloudOut
 from std_srvs.srv import Empty
 
-class Seeker():
+class Explorer():
 
 	"""
 	This node runs for the explorer robot.
@@ -31,25 +31,27 @@ class Seeker():
 
 		# Set up connections
 		self.sub = rospy.Subscriber("/{}/local_weed_poses".format(self.robot_id), PointCloud, self.add_points)
-		check_service = rospy.Service('remove_weed', PointCloudTrade, self.remove_points)
+		#check_service = rospy.Service('remove_weed', PointCloudOperation, self.remove_point)
+		check_service = rospy.Service('remove_weed', PointCloudOut, self.remove_point)
 		to_do_service = rospy.Service('get_to_do_list', PointCloudOut, self.share_weed_locations)
-		import pdb; pdb.set_trace()
 		rospy.spin()
 
 	def add_points(self, newPoints):
 		for point in newPoints.points:
+			point.x = np.around(point.x, decimals = 5)
+			point.y = np.around(point.y, decimals = 5)
+			point.z = 0 # All weeds are on the ground plane
 			indx = self.Point_to_Indices(point)
 			cell = self.Indices_to_Cell(indx)
 			if self.weed_map.data[cell] == 0:
 				self.weed_map.data[cell] = 100
 				self.weed_cloud.points.append(point)
 
-	def remove_points(self, checkedPoints):
-		for point in checkedPoints.points:
-			self.weed_cloud.points.remove(point)
+	def remove_point(self, data):
+		self.weed_cloud.points.pop(data.var)
 		return self.weed_cloud
 
-	def share_weed_locations(self):
+	def share_weed_locations(self, data):
 		return self.weed_cloud
 
 	def init_map(self):
@@ -88,4 +90,4 @@ class Seeker():
 	"""
 
 if __name__ == "__main__":
-	harry = Seeker(sys.argv[1])
+	expl = Explorer(sys.argv[1])
