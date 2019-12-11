@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   fake_localization
   uol_cmp9767m_base
   uol_cmp9767m_tutorial
+  navfn
 )
 
 ## System dependencies are found with CMake's conventions

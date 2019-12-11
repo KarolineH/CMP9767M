@@ -42,6 +42,7 @@
     <depend>fake_localization</depend>
     <depend>uol_cmp9767m_base</depend>
     <depend>uol_cmp9767m_tutorial</depend>
+    <depend>navfn</depend>
 
   <!--   Note that this is equivalent to the following: -->
   <!--   <build_depend>roscpp</build_depend> -->
