@@ -19,7 +19,8 @@ class Sprayer():
     so the robots don't get in each other's way. Then navigates to the weed, sprays it, and calls the remove_weed service to check
     the weed off the to-do list and get an update on the to-do list.
 
-    NOTE: The sprayer moves to the weed with his base_link frame, so the spray still misses the weed
+    NOTE: Currently, the sprayer moves to the weed with his base_link frame, so the spray still misses the weed
+    NOTE: If the sprayer robot is stuck, manually call the /next_weed service
     """
 
     def __init__(self, robot_id):
@@ -38,13 +39,14 @@ class Sprayer():
         self.fetch_weed_positions = rospy.ServiceProxy('get_to_do_list', PointCloudOut)
         self.remove_weed_position = rospy.ServiceProxy('remove_weed', PointCloudOut)
         self.spray = rospy.ServiceProxy("{}/spray".format(self.robot_id), Empty)
-        self.next_weed_service = rospy.Service('/next_weed', Empty, self.spraying_routine)
         # wait for the explorer robot to safely move out of the way
         # then move to the first waypoint of the exploration area:
         self.initial_coordination_routine()
-
+        self.next_weed_service = rospy.Service('/next_weed', Empty, self.spraying_routine)
+        
+        self.spraying_routine(1)
         # then start spraying weeds
-        self.spraying_routine()
+        rospy.spin()
 
 
     def initial_coordination_routine(self):
@@ -64,12 +66,8 @@ class Sprayer():
             status = status_message.status_list[0].status
             rospy.sleep(0.5)
 
-        print("Inital routine finished")
-
-    def spraying_routine(self):
-        print("Starting spraying routine")
+    def spraying_routine(self, servarg):
         rospy.wait_for_service('get_to_do_list', timeout=None)
-        print("Service available")
         weed_coordinates_response = self.fetch_weed_positions(1)
         weed_coordinates = weed_coordinates_response.output_cloud
         if not weed_coordinates.points:
