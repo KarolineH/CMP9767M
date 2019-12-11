@@ -28,8 +28,8 @@
       </include>
       <!-- <node pkg="rp_pack" type="explorer.py" name="explorer_robot" args="$(arg rob_id)"/> -->
     </group>
-<!--
-    <group if="$(eval role == 'sprayer')">
+
+    <!-- <group if="$(eval role == 'sprayer')">
       <node pkg="rp_pack" type="sprayer.py" name="sprayer_robot" args="$(arg rob_id)"  output="screen"/>
     </group> -->
 

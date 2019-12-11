@@ -8,7 +8,7 @@
   <arg name="tf_prefix" default="$(arg robot_name)" />
   <arg name="robot_model" default="$(find uol_cmp9767m_base)/config/robot.yaml"/>
   <arg name="model_extras" default="$(find uol_cmp9767m_base)/urdf/sensors.xacro"/>
-   <!-- Launch everything in the robot namespace -->
+  <!-- Launch everything in the robot namespace -->
   <group ns="$(arg robot_name)">
 
     <!-- model bringup -->

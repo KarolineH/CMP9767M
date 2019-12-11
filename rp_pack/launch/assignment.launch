@@ -2,7 +2,7 @@
   <!-- Include a second robot?-->
   <arg name="two_robots" value="true"/>
 
-<!-- Launch Simulation including robot models-->
+  <!-- Launch Simulation including robot models-->
   <include file="$(find uol_cmp9767m_base)/launch/thorvald-sim.launch">
     <arg name="obstacles" default="false" />
     <arg name="second_robot" value="$(arg two_robots)" />
