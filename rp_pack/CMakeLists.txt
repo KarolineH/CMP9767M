@@ -12,6 +12,16 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   message_generation
+  opencv_apps
+  find_object_2d
+  video_stream_opencv
+  topic_tools
+  image_geometry
+  robot_localization
+  amcl
+  fake_localization
+  uol_cmp9767m_base
+  uol_cmp9767m_tutorial
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,7 +67,6 @@ add_message_files(
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  PointCloudTrade.srv
   PointCloudOut.srv
 )
 
