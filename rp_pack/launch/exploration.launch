@@ -1,24 +1,33 @@
 <launch>
+  <!-- Arguments -->
   <arg name="robot_name" default="thorvald_001" />
+  <arg name="spacing" default="1" />
+
+  <param name="/use_sim_time" value="true"/>
+  <!-- Launch everything in the robot's namespace -->
   <group ns="$(arg robot_name)">
-    <remap from="map" to="/map"/>
-    <remap from="odom" to="/$(arg robot_name)/odometry/gazebo"/>
-    <arg name="spacing" default="1" />
 
-    <param name="/use_sim_time" value="true"/>
-
+    <!-- Heatmap Client -->
     <node name="heatmap_client" pkg="heatmap" type="heatmap_client" respawn="false">
-      <remap from="tf" to="/tf"/>
       <param name="tf_prefix" value="$(arg robot_name)"/>
+      <remap from="tf" to="/tf"/>
+      <remap from="map" to="/map"/>
+      <remap from="odom" to="/$(arg robot_name)/odometry/gazebo"/>
     </node>
+    <!-- Path planner -->
     <node name="path_planner" pkg="heatmap" type="path_planner.py" respawn="false">
       <param name="coverage_spacing" value="$(arg spacing)" />
       <param name="tf_prefix" value="$(arg robot_name)"/>
       <remap from="tf" to="/tf"/>
+      <remap from="map" to="/map"/>
+      <remap from="odom" to="/$(arg robot_name)/odometry/gazebo"/>
     </node>
+    <!-- WiFi Signal Simulation (WiFi not used here, but runs because it is a dependency for the heatmap package) -->
     <node name="signal_sim" pkg="heatmap" type="signal_sim" >
-      <remap from="tf" to="/tf"/>
       <param name="tf_prefix" value="$(arg robot_name)"/>
+      <remap from="tf" to="/tf"/>
+      <remap from="map" to="/map"/>
+      <remap from="odom" to="/$(arg robot_name)/odometry/gazebo"/>
     </node>
   </group>
     <!-- <node name="distance_measure" pkg="heatmap" type="distance_measure"/> -->

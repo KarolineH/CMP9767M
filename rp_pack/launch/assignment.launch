@@ -1,7 +1,8 @@
 <launch>
+  <!-- Include a second robot?-->
   <arg name="two_robots" value="true"/>
 
-  <!-- Launch Simulation -->
+<!-- Launch Simulation including robot models-->
   <include file="$(find uol_cmp9767m_base)/launch/thorvald-sim.launch">
     <arg name="obstacles" default="false" />
     <arg name="second_robot" value="$(arg two_robots)" />
@@ -9,6 +10,7 @@
     <arg name="map_server" default= "true"/>
   </include>
 
+  <!-- Launch robot behaviour for each robot seperately -->
   <include file="$(find rp_pack)/launch/single_robot.launch">
     <arg name="rob_id" value="thorvald_001" />
     <arg name="role" value="explorer" />
@@ -20,5 +22,6 @@
     <arg name="initial_x" value="-5.0"/>
   </include>
 
+  <!-- Launch rviz visualisation -->
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find rp_pack)/rviz/rp_config.rviz"/>
 </launch>

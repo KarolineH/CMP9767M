@@ -7,7 +7,7 @@
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="computing@todo.todo">computing</maintainer>
+  <maintainer email="18727004@students.lincoln.ac.uk" >Karoline Heiwolt</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -32,7 +32,17 @@
   <!-- Dependencies can be catkin packages or system dependencies -->
   <!-- Examples: -->
   <!-- Use depend as a shortcut for packages that are both build and exec dependencies -->
-  <!--   <depend>roscpp</depend> -->
+    <depend>opencv_apps</depend>
+    <depend>find_object_2d</depend>
+    <depend>video_stream_opencv</depend>
+    <depend>topic_tools</depend>
+    <depend>image_geometry</depend>
+    <depend>robot_localization</depend>
+    <depend>amcl</depend>
+    <depend>fake_localization</depend>
+    <depend>uol_cmp9767m_base</depend>
+    <depend>uol_cmp9767m_tutorial</depend>
+
   <!--   Note that this is equivalent to the following: -->
   <!--   <build_depend>roscpp</build_depend> -->
   <!--   <exec_depend>roscpp</exec_depend> -->

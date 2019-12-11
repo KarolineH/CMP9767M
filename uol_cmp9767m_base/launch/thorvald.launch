@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 
 <launch>
+  <!-- Arguments -->
   <arg name="robot_name" />
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
   <arg name="tf_prefix" default="$(arg robot_name)" />
   <arg name="robot_model" default="$(find uol_cmp9767m_base)/config/robot.yaml"/>
   <arg name="model_extras" default="$(find uol_cmp9767m_base)/urdf/sensors.xacro"/>
+   <!-- Launch everything in the robot namespace -->
   <group ns="$(arg robot_name)">
 
     <!-- model bringup -->
@@ -31,6 +33,6 @@
 
     <!-- spawn robot in gazebo -->
     <node pkg="gazebo_ros" type="spawn_model" name="spawner" args="-urdf -x $(arg x) -y $(arg y) -param robot_description -model $(arg robot_name)" />
-    <node pkg="uol_cmp9767m_base" type="sprayer.py" name="sprayer" />
+    <node pkg="uol_cmp9767m_base" type="sprayer.py" name="spray" args="$(arg robot_name)"/>
   </group>
 </launch>
