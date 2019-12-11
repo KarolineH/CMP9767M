@@ -3,7 +3,6 @@ import rospy
 import numpy as np
 import tf
 import sys
-from sensor_msgs.msg import PointCloud
 from geometry_msgs.msg import PoseStamped
 from std_srvs.srv import Empty
 from visualization_msgs.msg  import MarkerArray
@@ -14,81 +13,135 @@ class Sprayer():
 
     """
     This node runs for the sprayer robot.
-    It fetches a to-do list of weed positions from the explorer robot.
-    It then plans a route to visit and spray all weeds.
-    Once sprayed, it calls the remove_weed service to check the weed off the list.
-    It then fetches an updated to-do list and re-plans the route
+    First gives the explorer robot a head start, then fetches an up-to-date to-do list of weed positions from the explorer robot.
+    It picks a weed that is preferably already close to the sprayer attachement, while also being far from the explorer robot,
+    so the robot's don't get in each other way. Then navigates to the weed, sprays it, and calls the remove_weed service to check
+    the weed off the to-do list and get an update on the to-do list.
     """
 
     def __init__(self, robot_id):
-        rospy.init_node('Chaser', anonymous = True)
-        self.tfl = tf.TransformListener()
-        self.robot_id = robot_id
 
+        rospy.init_node('Chaser', anonymous = True)
+
+        # Variables
+        self.robot_id = robot_id
+        self.explorer_robot = "thorvald_001" # anually rename  if necessary
+        self.min_robot_distance = 1.2 # in meters
+        self.head_start = 30 # in seconds
+
+        # Set up connections
+        self.tfl = tf.TransformListener()
         self.move_pub = rospy.Publisher("/{}/move_base_simple/goal".format(self.robot_id), PoseStamped, queue_size=2)
-        self.weed_visual_pub = rospy.Publisher("/{}/global_weed_poses".format(self.robot_id), PointCloud, queue_size=2)
         self.fetch_weed_positions = rospy.ServiceProxy('get_to_do_list', PointCloudOut)
         self.remove_weed_position = rospy.ServiceProxy('remove_weed', PointCloudOut)
-        self.spray = rospy.ServiceProxy("/{}/spray".format(self.robot_id), Empty)
+        self.spray = rospy.ServiceProxy("{}/spray".format(self.robot_id), Empty)
 
-        exploration_topics = []
-        while not exploration_topics:
-            topics = rospy.get_published_topics()
-            topic_names = [topic[0] for topic in topics]
-            exploration_topics = filter(lambda t: "visualization_marker" in t, topic_names)
+        # wait for the explorer robot to safely move out of the way
+        # then move to the first waypoint of the exploration area:
+        self.initial_coordination_routine()
+
+        #while not rospy.is_shutdown():
+            # then start spraying weeds
+        self.spraying_routine()
+
+
+    def initial_coordination_routine(self):
+        rospy.loginfo("SPRAYER ROBOT: Ready. Waiting for explorer robot.")
+        # Once the explorer starts moving, find out where it's going first:
+        explorer_initial_pose = rospy.wait_for_message("/{}/move_base/current_goal".format(self.explorer_robot), PoseStamped, 1000)
+        # Wait until the explorer's goal changes to the second waypoint
+        explorer_current_goal = rospy.wait_for_message("/{}/move_base/current_goal".format(self.explorer_robot), PoseStamped, 1000)
+
+        self.move_pub.publish(explorer_initial_pose) # then follow to the first pose of the exploration path
+        rospy.loginfo("SPRAYER ROBOT: Navigating to safe starting posisition")
+        # Wait until the goal is reached:
+        status = 1 # status = navigating to the goal
+        while status < 2:
+            # status of 0 or 1 mean that the movement goal is still being processed
+            status_message = rospy.wait_for_message("/{}/move_base/status".format(self.robot_id), GoalStatusArray, 30)
+            status = status_message.status_list[0].status
             rospy.sleep(0.5)
-        rospy.wait_for_message(exploration_topics[0], MarkerArray, 30)
-        # wait until the exploration robot has started moving
-        while not rospy.is_shutdown():
-            self.runtime_routine()
 
-    def runtime_routine(self):
+        print("Inital routine finished")
+
+    def spraying_routine(self):
+        print("Starting spraying routine")
         rospy.wait_for_service('get_to_do_list', timeout=None)
+        print("Service available")
         weed_coordinates_response = self.fetch_weed_positions(1)
         weed_coordinates = weed_coordinates_response.output_cloud
         if not weed_coordinates.points:
+            print("weeds empty")
             rospy.sleep(1)
             weed_coordinates_response = self.fetch_weed_positions(1)
             weed_coordinates = weed_coordinates_response.output_cloud
         else:
+            rospy.loginfo("SPRAYER ROBOT: To-do list received from exploration robot")
+
             # The weed_coordinates are where we want the spray to go
             # The sprayer needs to be aligned with this coordinate (z-distance does not matter)
-
             now = rospy.Time(0)
             self.tfl.waitForTransform("/map","/{}/sprayer".format(self.robot_id), now, rospy.Duration(100))
             sprayer_pose = self.tfl.lookupTransform("/map","/{}/sprayer".format(self.robot_id), now)
-            # Find closest next weed
-            x_distances = []
-            y_distances = []
-            distances = []
+            explorer_pose = self.tfl.lookupTransform("/map","/{}/base_link".format(self.explorer_robot), now)
+
+            # Find the weed that best satisfies the conditions i) far from eplorer ii) close to sprayer
+            sprayer_translations_x = []
+            sprayer_translations_y = []
+            qs = [] # quality metric
+            # for each weed
             for i in range(0,len(weed_coordinates.points)):
-                x_diff = weed_coordinates.points[i].x - sprayer_pose[0][0]
-                y_diff = weed_coordinates.points[i].y - sprayer_pose[0][1]
-                x_distances.append(x_diff)
-                y_distances.append(y_diff)
-                distances.append((x_diff**2 + y_diff**2)**0.5) # euclidean distance
 
-            closest_weed_index = np.argmin(distances)
-            closest_weed_location = weed_coordinates.points[closest_weed_index]
+                # find the distance to the explorer robot
+                explorer_dist_x = weed_coordinates.points[i].x - explorer_pose[0][0]
+                explorer_dist_y = weed_coordinates.points[i].y - explorer_pose[0][1]
+                explorer_eucl_dist = (explorer_dist_x ** 2 + explorer_dist_y ** 2) **0.5
 
+                # find the distance to the sprayer attachment on the sprayer robot
+                sprayer_dist_x = weed_coordinates.points[i].x - sprayer_pose[0][0]
+                sprayer_dist_y = weed_coordinates.points[i].y - sprayer_pose[0][1]
+                sprayer_eucl_dist = (sprayer_dist_x ** 2 + sprayer_dist_y ** 2) **0.5
+
+                # calculate the quality metric
+                q = explorer_eucl_dist - sprayer_eucl_dist
+
+                sprayer_translations_x.append(sprayer_dist_x) # store for easy navigation
+                sprayer_translations_y.append(sprayer_dist_y) # store for easy navigation
+                qs.append(q) # store quality metric
+
+            # Find the best quality weed location
+            next_weed_index = np.argmax(qs)
+            next_weed_location = weed_coordinates.points[next_weed_index]
+
+            #Construct a movement goal:
             movement_instruction = PoseStamped()
             movement_instruction.header.frame_id = "/{}/base_link".format(self.robot_id)
-            movement_instruction.pose.position.x = x_distances[closest_weed_index]
-            movement_instruction.pose.position.y = y_distances[closest_weed_index]
+            movement_instruction.pose.position.x = sprayer_translations_x[next_weed_index]
+            movement_instruction.pose.position.y = sprayer_translations_y[next_weed_index]
             movement_instruction.pose.orientation.w = 1
             self.move_pub.publish(movement_instruction)
 
-            status = 1 # navigating to the goal
-            while status < 2:
+            # movement_instruction = PoseStamped()
+            # movement_instruction.header.frame_id = "/map"
+            # movement_instruction.pose.position.x = next_weed_location.x
+            # movement_instruction.pose.position.y = next_weed_location.y
+            # movement_instruction.pose.position.z = 0
+            # movement_instruction.pose.orientation.w = 1
+            # movement_instruction.pose.position.y = sprayer_translations_y[next_weed_index]
+            # movement_instruction.pose.orientation.w = 1
+            #self.move_pub.publish(movement_instruction)
+
+            status = 1 # status = navigating to the goal
+            while status != 3:
                 # status of 0 or 1 mean that the movement goal is still being processed
                 status_message = rospy.wait_for_message("/{}/move_base/status".format(self.robot_id), GoalStatusArray, 30)
                 status = status_message.status_list[0].status
                 rospy.sleep(0.5)
 
             if status == 3: # if the goal has been reached successfully
-                #rospy.wait_for_service('spray', timeout=None)
                 self.spray()
-                self.remove_weed_position(int(closest_weed_index))
+                rospy.loginfo("SPRAYER ROBOT: successfully sprayed weed")
+                self.remove_weed_position(int(next_weed_index)) # check this weed off the to-do list
 
 if __name__ == "__main__":
     spr = Sprayer(sys.argv[1])

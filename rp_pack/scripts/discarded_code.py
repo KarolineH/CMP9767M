@@ -101,3 +101,38 @@ def grid_indices_to_coordinates(self, indices):
 
                     distance_matrix[i,j] = (xdiff**2 + ydiff**2)**0.5 # euclidean distance
                     distance_matrix[j,i] = distance_matrix[i,j] # since the matrix is symmetrical
+
+
+
+exploration_topics = []
+while not exploration_topics:
+    topics = rospy.get_published_topics()
+    topic_names = [topic[0] for topic in topics]
+    exploration_topics = filter(lambda t: "visualization_marker" in t, topic_names)
+    rospy.sleep(0.5)
+# wait until the exploration robot has started moving
+rospy.wait_for_message(exploration_topics[0], MarkerArray, 1000)
+
+
+
+		# Wait for the camera_converter node to specify camera setup details:
+		#
+		while not rospy.has_param('/{}/FoV_footprint'.format(self.robot_id)):
+			rospy.sleep(1)
+		self.min_view_dimension = min(rospy.get_param('/{}/FoV_footprint'.format(self.robot_id)))
+
+
+
+        # the explorer robot always traverses the exploration area in lines parallel to the y-axis
+        # so, wait until the explorer robot is far enough away in x-direction
+        # dist = 0
+        # while dist < self.min_robot_distance:
+        #     relative_pose = self.tfl.transformPose("/{}/base_link".format(self.explorer_robot), explorer_initial_pose)
+        #     dist = relative_pose.pose.position.x
+        # rospy.loginfo("SPRAYER ROBOT: Now spraying weeds")
+
+        # while explorer_current_goal == explorer_initial_pose:
+        #     explorer_current_goal = rospy.wait_for_message("/{}/move_base/current_goal".format(self.explorer_robot), PoseStamped, 1000)
+        #     rospy.sleep(1)
+
+        # rospy.sleep(self.head_start) # ALTERNATIVE: give the explorer a timed  head start

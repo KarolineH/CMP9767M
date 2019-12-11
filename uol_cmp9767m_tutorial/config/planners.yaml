@@ -27,6 +27,8 @@ DWAPlannerROS:
   path_distance_bias: 32.0
   goal_distance_bias: 20.0
   occdist_scale: 0.02
+  xy_goal_tolerance: 0.15
+  yaw_goal_tolerance: 0.1
 
 NavfnROS:
   visualize_potential: true # (bool, default: false) Specifies whether or not to visualize the potential area computed via a PointCloud2.
