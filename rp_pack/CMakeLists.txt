@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   uol_cmp9767m_base
   uol_cmp9767m_tutorial
   navfn
+  global_planner
 )
 
 ## System dependencies are found with CMake's conventions

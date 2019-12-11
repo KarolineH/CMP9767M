@@ -66,7 +66,7 @@ class Sprayer():
 
         print("Inital routine finished")
 
-    def spraying_routine(self):
+    def spraying_routine(self, srvcall):
         print("Starting spraying routine")
         rospy.wait_for_service('get_to_do_list', timeout=None)
         print("Service available")
