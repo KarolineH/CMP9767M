@@ -43,7 +43,7 @@ class Sprayer():
         # then move to the first waypoint of the exploration area:
         self.initial_coordination_routine()
         self.next_weed_service = rospy.Service('/next_weed', Empty, self.spraying_routine)
-        
+
         self.spraying_routine(1)
         # then start spraying weeds
         rospy.spin()
@@ -79,7 +79,7 @@ class Sprayer():
             rospy.loginfo("SPRAYER ROBOT: To-do list received from exploration robot")
 
             # The weed_coordinates are where we want the spray to go
-            # The sprayer needs to be aligned with this coordinate (z-distance does not matter)
+            # So find out where the sprayer is
             now = rospy.Time(0)
             self.tfl.waitForTransform("/map","/{}/sprayer".format(self.robot_id), now, rospy.Duration(100))
             sprayer_pose = self.tfl.lookupTransform("/map","/{}/sprayer".format(self.robot_id), now)

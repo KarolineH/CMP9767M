@@ -14,7 +14,8 @@ class Explorer():
 	This node runs for the explorer robot.
 	It keeps a permanent map of weeds (topic global_weed_poses) and a to-do list of weeds that have to be sprayed.
 	It automatically adds new weeds seen by the explorer.
-	Also provides a service to cross weeds off the to-do list once they have been sprayed by the sprayer robot.
+	Also provides a service to cross weeds off the to-do list once they have been sprayed by the sprayer robot,
+	and returns a call to the next_weed service, to send the sprayer to the next goal.
 	"""
 
 	def __init__(self, robot_id):
@@ -55,6 +56,7 @@ class Explorer():
 	def remove_point(self, data):
 		# Check a weed off the to-do list
 		self.weed_to_do_list.points.pop(data.var)
+		# Send the sprayer robot to the next goal
 		self.next_weed()
 		return self.weed_to_do_list
 
