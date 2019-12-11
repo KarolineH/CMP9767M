@@ -36,9 +36,9 @@ class Sprayer():
         # Set up connections
         self.tfl = tf.TransformListener()
         self.move_pub = rospy.Publisher("/{}/move_base_simple/goal".format(self.robot_id), PoseStamped, queue_size=2)
-        self.fetch_weed_positions = rospy.ServiceProxy('get_to_do_list', PointCloudOut)
-        self.remove_weed_position = rospy.ServiceProxy('remove_weed', PointCloudOut)
-        self.spray = rospy.ServiceProxy("{}/spray".format(self.robot_id), Empty)
+        self.fetch_weed_positions = rospy.ServiceProxy('/get_to_do_list', PointCloudOut)
+        self.remove_weed_position = rospy.ServiceProxy('/remove_weed', PointCloudOut)
+        self.spray = rospy.ServiceProxy("/{}/spray".format(self.robot_id), Empty)
         # wait for the explorer robot to safely move out of the way
         # then move to the first waypoint of the exploration area:
         self.initial_coordination_routine()
@@ -67,7 +67,7 @@ class Sprayer():
             rospy.sleep(0.5)
 
     def spraying_routine(self, servarg):
-        rospy.wait_for_service('get_to_do_list', timeout=None)
+        rospy.wait_for_service('/get_to_do_list', timeout=None)
         weed_coordinates_response = self.fetch_weed_positions(1)
         weed_coordinates = weed_coordinates_response.output_cloud
         if not weed_coordinates.points:

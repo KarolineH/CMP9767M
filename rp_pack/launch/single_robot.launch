@@ -30,7 +30,7 @@
     </group>
 
     <group if="$(eval role == 'sprayer')">
-      <node pkg="rp_pack" type="sprayer.py" name="$(arg rob_id)/sprayer_robot" args="$(arg rob_id)"  output="screen"/>
+      <node pkg="rp_pack" type="sprayer.py" name="sprayer_robot" args="$(arg rob_id)"  output="screen" ns="$(arg rob_id)"/>
     </group>
 
 </launch>

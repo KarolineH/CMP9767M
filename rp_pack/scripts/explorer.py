@@ -30,6 +30,7 @@ class Explorer():
 		# Set up connections
 		self.sub = rospy.Subscriber("/{}/local_weed_poses".format(self.robot_id), PointCloud, self.add_points)
 		self.weed_visual_pub = rospy.Publisher("/{}/global_weed_poses".format(self.robot_id), PointCloud, queue_size=2)
+		self.weed_map_pub= rospy.Publisher("/{}/global_weed_map".format(self.robot_id), OccupancyGrid, queue_size=2)
 		self.check_service = rospy.Service('remove_weed', PointCloudOut, self.remove_point)
 		self.to_do_service = rospy.Service('get_to_do_list', PointCloudOut, self.share_weed_locations)
 		self.next_weed = rospy.ServiceProxy('/next_weed', Empty)
@@ -51,7 +52,9 @@ class Explorer():
 				self.weed_map.data[cell] = 100
 				self.weed_to_do_list.points.append(point)
 
-		self.weed_visual_pub.publish(self.global_weed_cloud) # for visualisation
+		# for visualisation:
+		self.weed_visual_pub.publish(self.global_weed_cloud)
+		self.weed_map_pub.publish(self.weed_map)
 
 	def remove_point(self, data):
 		# Check a weed off the to-do list
