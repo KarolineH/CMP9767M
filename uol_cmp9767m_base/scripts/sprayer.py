@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+import sys
 from gazebo_msgs.srv import SpawnModel, SpawnModelRequest
 from std_srvs.srv import Empty
 from uuid import uuid4
@@ -49,17 +50,17 @@ BOX_SDF="""
 
 class Sprayer:
 
-    def __init__(self):
+    def __init__(self, robot_name):
         self.sdf = BOX_SDF
-        rospy.Service('spray', Empty, self.spray)
-        self.spawner = rospy.ServiceProxy(
-            '/gazebo/spawn_sdf_model', SpawnModel)
+        self.robot_name = robot_name
+        rospy.Service("/{}/spray".format(self.robot_name), Empty, self.spray)
+        self.spawner = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
 
     def spray(self, r):
         request = SpawnModelRequest()
         request.model_name = 'killbox_%s' % uuid4()
         request.model_xml = self.sdf
-        request.reference_frame = 'thorvald_001/base_link'
+        request.reference_frame = '{}/base_link'.format(self.robot_name)
         request.initial_pose.position.z = 0.005
         request.initial_pose.position.x = -0.45
         request.initial_pose.orientation.w = 1.0
@@ -68,8 +69,8 @@ class Sprayer:
 
 
 if __name__ == "__main__":
-    rospy.init_node('sprayer')
-    m2s = Sprayer()
+    rospy.init_node('spray', anonymous = True)
+    m2s = Sprayer(sys.argv[1])
     #m2s.spray()
     #m2s.load_file('test.yaml')
     #m2s._create_svg()
